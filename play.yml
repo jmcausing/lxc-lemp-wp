@@ -1,0 +1,131 @@
+- hosts: all
+  vars:
+    ansible_host_key_checking: false
+
+    # Workaround if LXC target host does not have python 3 (not by default)
+    ansible_python_interpreter: "/usr/bin/python3"
+    
+  vars_files:
+    - vars.yml
+  become: true
+  become_user: root
+
+  # Ansible tasks stars here..
+  tasks:
+
+
+    # -- START Install Required repo and updates.
+    # Required for PHP FPM
+    - apt_repository:
+        repo: ppa:ondrej/php
+
+    # Update repo and cache
+    - name:  Update repository
+      apt: name={{ item }} update_cache=yes state=latest
+      loop: [ 'software-properties-common' ]
+
+    # Installing packages: 'nginx', 'mariadb-server', 'python3-pymysql', 'python3-pip', 'python3-mysqldb'
+    - name: Install LEMP Packages [nginx, mysq-server, python3-pymysql']
+      apt: name={{ item }} update_cache=yes state=latest
+      # loop: [ 'nginx', 'mariadb-server', 'python3-pymysql', 'python3-pip', 'python3-mysqldb' ]3
+      loop: [ 'nginx', 'mariadb-server', 'python3-mysqldb' ]
+     
+    - name: Sets the root password 
+      mysql_user: 
+        name: root 
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+    #   
+    # -- START Install Required repo and updates 
+
+    
+    # -- START 
+    # Step 1 — Creating a Database and User for WordPress
+    # https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-lemp-nginx-mariadb-and-php-on-debian-10
+
+    - name: Create a new database with name 'wordpress'
+      mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: wordpress
+        state: present
+
+    - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+      mysql_user:
+       name: wp_user
+       password: "{{ mysql_password }}"
+       state: present
+       login_unix_socket: /var/run/mysqld/mysqld.sock
+       priv: 'wordpress.*:ALL/wordpress.*:ALL/*.*:SUPER,RELOAD,SHOW DATABASES'
+
+    - name: Flush Privileges
+      shell: mysql -e "FLUSH PRIVILEGES;"  
+
+    # Step 1 — Creating a Database and User for WordPress  
+    # -- END 
+
+
+
+    # -- START 
+    # Step 2 — Installing Additional PHP Extensions
+    # https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-lemp-nginx-mariadb-and-php-on-debian-10#step-2-%E2%80%94-installing-additional-php-extensions
+ 
+    - name: Installing PHP 7.3 extension
+      apt:  name={{ item }} 
+      loop: [ 'php7.3-fpm', 'php7.3-common', 'php7.3-mysql', 'php7.3-curl', 'php7.3-json', 'php7.3-mbstring', 'php7.3-xml', 'php7.3-zip', 'php7.3-gd', 'php7.3-soap', 'php7.3-ssh2', 'php7.3-tokenizer' ]
+      # loop: [ 'php7.3-fpm', 'php7.3-mysql', 'php7.3-common','php7.3-cli','php7.3-bcmath','php7.3-bz2','php7.3-curl','php7.3-gd','php7.3-intl','php7.3-json','php7.3-mbstring','php7.3-readline','php7.3-xml','php7.3-zip' ]
+
+
+    # Nginx Configuration
+    - name: Sets / copy Nginx conf file
+      template:
+        src: "default"
+        dest: "/etc/nginx/sites-available/default"
+
+    # Test and reload nginx
+    - name: Test and reload Nginx 
+      shell: "nginx -t; systemctl reload nginx;"
+
+    # Step 2 — Installing Additional PHP Extensions
+    # -- END 
+
+
+    # -- START
+    # WordPress Configuration and permission -
+    # Step 4 — Downloading WordPress - https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-lemp-nginx-mariadb-and-php-on-debian-10
+
+    - name: Download and unpack latest WordPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/var/www"
+        remote_src: yes
+        creates: "/var/www/wordpress"
+
+    - name: Remove old html and replace with with WP files
+      shell: "rm -rf /var/www/html; mv /var/www/wordpress /var/www/html"
+
+    - name: Set ownership
+      file:
+        path: "/var/www/html"
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
+      tags: [ wordpress ]
+
+    - name: Set permissions for directories
+      shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 750 {} \\;"
+      tags: [ wordpress ]
+
+    - name: Set permissions for files
+      shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 640 {} \\;"
+      tags: [ wordpress ]
+    
+    - name: Set up wp-config
+      template:
+        src: "ansible_wpconfig.php"
+        dest: "/var/www/html/wp-config.php"
+        owner: www-data
+        group: www-data
+
+    # WordPress Configuration and permission -
+    # -- END
