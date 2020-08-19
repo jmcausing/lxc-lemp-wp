@@ -1,4 +1,8 @@
 #!/bin/bash
+clear
+echo "#### LXC + LEMP + WordPress by generator by John Mark C."
+echo "#"
+
 
 # Cloudflare add DNS for this LXC
 # Cloudflare zone is the zone which holds the record
@@ -6,102 +10,13 @@ zone=causingdesigns.net
 
 ## Cloudflare authentication details
 ## keep these private
-cloudflare_auth_email=xxxx@gmail.com
-cloudflare_auth_key=xxxxxxxx
+cloudflare_auth_email=xxxxx@gmail.com
+cloudflare_auth_key=xxxxxx
 
 
 
-clear
 
-
-echo "#### LXC + LEMP + WordPress by generator by John Mark C."
-echo "#"
-echo "#"
-
-
-#  - START - HAPRoxy check
-##    
-##    
-if [[ $(lxc list | grep haproxy) ]]; 
-then
-     echo "# HAProxy is found!"
-else
-     echo "# HAProxy is not here. Installing HAProxy"
-     lxc launch ubuntu:18.04 haproxy
-     echo "#"
-     echo "# Trying to get the HAProxy IP Address.."
-     HAProxy_LXC_IP=$(lxc list | grep haproxy | awk '{print $6}')
-     VALID_IP=^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$
-     # START - SPINNER 
-     #
-     sp="/-\|"
-     sc=0
-     spin() {
-     printf "\b${sp:sc++:1}"
-     ((sc==${#sp})) && sc=0
-     }
-     endspin() {
-     printf "\r%s\n" "$@"
-     }
-     #
-     # - END SPINNER
-     # Getting the IP of LXC
-     while ! [[ "${HAProxy_LXC_IP}" =~ ${VALID_IP} ]]; do
-         HAProxy_LXC_IP=$(lxc list | grep haproxy | awk '{print $6}')
-         spin
-     done
-     endspin
-     echo "# "
-     echo "# IP Address found! HAProxy LXC IP: ${HAProxy_LXC_IP}"
-     
-     echo "# "
-     echo "# Updating HAProxy container"
-     echo "# "
-     lxc exec haproxy -- sh -c "apt update" --verbose
-     echo "# "
-     echo "# Downloading HAProxy (apt install haproxy))"
-     lxc exec haproxy -- sh -c "apt -y install haproxy" --verbose
-     echo "# "
-     echo "# Download and transfer HAProxy config file"    
-     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/haproxy.cfg
-     lxc exec haproxy -- sh -c "rm /etc/haproxy/haproxy.cfg"
-     lxc file push haproxy.cfg haproxy/etc/haproxy/haproxy.cfg --verbose
-     echo "# "
-     echo "# Testing and reloading HAProxy config"
-     lxc exec haproxy -- sh -c "/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c" --verbose
-     lxc exec haproxy -- sh -c "sudo systemctl reload haproxy"   --verbose
-     rm haproxy.cfg     
-     haproxyip=$(lxc exec jm1 -- sh -c "ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'")
-     echo "# "
-     echo "# HAProxy is now installed!"
-     # Flushing IP Tables
-     echo "# Flushing iptables rules..."
-     sleep 1
-     sudo iptables -F
-     sudo iptables -X
-     sudo iptables -t nat -F
-     sudo iptables -t nat -X
-     sudo iptables -t mangle -F
-     sudo iptables -t mangle -X
-     sudo iptables -P INPUT ACCEPT
-     sudo iptables -P FORWARD ACCEPT
-     sudo iptables -P OUTPUT ACCEPT
-     # Adding IP tables for HAProxy 
-     echo "#"
-     echo "# Inserting new IP tables for HAProxy"
-     sudo iptables -t nat -I PREROUTING -i ens4 -p TCP --dport 80 -j DNAT --to-destination ${HAProxy_LXC_IP}:80
-     # Reload and save IP Tables
-     echo "#"
-     echo "# Save IP tables"
-     echo "#"
-     sudo /sbin/iptables-save
-fi
-##    
-## 
-#  - END - HAPRoxy check
-
-
-### 
+#################### 
 # Start - Clean mode
 if [ "$1" == "clean" ]
 then
@@ -307,9 +222,14 @@ fi
 fi
 
 # END - Clean mode
-### 
-echo "#"
-echo "#"
+################## 
+
+
+
+
+
+
+
 echo "# Hello! Enter the LXC container name please:"
 
 read -p "# Enter LXC name: " lxcname
@@ -317,6 +237,121 @@ read -p "# Enter LXC name: " lxcname
 echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
 echo "#"
 echo "#"
+
+
+#!/bin/bash
+
+
+
+if ! command -v lxd &> /dev/null
+then
+    echo "# LXC is not yet installed"
+    echo "# Installing LXD.."
+    sudo apt -y update
+    sudo apt install -y lxd
+    wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
+    lxd init --preseed < lxdconfig.yaml
+    
+else
+    echo "# LXC is here.."
+fi
+
+
+if ! command -v ansible &> /dev/null
+then
+    echo "# Ansible is not yet installed"
+    echo "# Installing Ansible.."
+    sudo apt -y update
+    sudo apt -y install ansible
+    
+else
+    echo "# Ansible is here.."
+fi
+
+
+
+#  - START - HAPRoxy check
+##    
+##    
+if [[ $(lxc list | grep haproxy) ]]; 
+then
+     echo "# HAProxy is found!"
+else
+     echo "# HAProxy is not here. Installing HAProxy"
+     lxc launch ubuntu:18.04 haproxy
+     echo "#"
+     echo "# Trying to get the HAProxy IP Address.."
+     HAProxy_LXC_IP=$(lxc list | grep haproxy | awk '{print $6}')
+     VALID_IP=^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$
+     # START - SPINNER 
+     #
+     sp="/-\|"
+     sc=0
+     spin() {
+     printf "\b${sp:sc++:1}"
+     ((sc==${#sp})) && sc=0
+     }
+     endspin() {
+     printf "\r%s\n" "$@"
+     }
+     #
+     # - END SPINNER
+     # Getting the IP of LXC
+     while ! [[ "${HAProxy_LXC_IP}" =~ ${VALID_IP} ]]; do
+         HAProxy_LXC_IP=$(lxc list | grep haproxy | awk '{print $6}')
+         spin
+     done
+     endspin
+     echo "# "
+     echo "# IP Address found! HAProxy LXC IP: ${HAProxy_LXC_IP}"
+     
+     echo "# "
+     echo "# Updating HAProxy container"
+     echo "# "
+     lxc exec haproxy -- sh -c "apt update" --verbose
+     echo "# "
+     echo "# Downloading HAProxy (apt install haproxy))"
+     lxc exec haproxy -- sh -c "apt -y install haproxy" --verbose
+     echo "# "
+     echo "# Download and transfer HAProxy config file"    
+     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/haproxy.cfg
+     lxc exec haproxy -- sh -c "rm /etc/haproxy/haproxy.cfg"
+     lxc file push haproxy.cfg haproxy/etc/haproxy/haproxy.cfg --verbose
+     echo "# "
+     echo "# Testing and reloading HAProxy config"
+     lxc exec haproxy -- sh -c "/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c" --verbose
+     lxc exec haproxy -- sh -c "sudo systemctl reload haproxy"   --verbose
+     rm haproxy.cfg     
+     haproxyip=$(lxc exec jm1 -- sh -c "ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'")
+     echo "# "
+     echo "# HAProxy is now installed!"
+     # Flushing IP Tables
+     echo "# Flushing iptables rules..."
+     sleep 1
+     sudo iptables -F
+     sudo iptables -X
+     sudo iptables -t nat -F
+     sudo iptables -t nat -X
+     sudo iptables -t mangle -F
+     sudo iptables -t mangle -X
+     sudo iptables -P INPUT ACCEPT
+     sudo iptables -P FORWARD ACCEPT
+     sudo iptables -P OUTPUT ACCEPT
+     # Adding IP tables for HAProxy 
+     echo "#"
+     echo "# Inserting new IP tables for HAProxy"
+     sudo iptables -t nat -I PREROUTING -i ens4 -p TCP --dport 80 -j DNAT --to-destination ${HAProxy_LXC_IP}:80
+     # Reload and save IP Tables
+     echo "#"
+     echo "# Save IP tables"
+     echo "#"
+     sudo /sbin/iptables-save
+fi
+##    
+## 
+#  - END - HAPRoxy check
+
+
 
 
 # 18.04
