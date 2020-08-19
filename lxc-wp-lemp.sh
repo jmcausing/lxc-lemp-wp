@@ -242,14 +242,14 @@ echo "#"
 #!/bin/bash
 
 
-if ! command -v lxd &> /dev/nullv
+if ! command -v sudo lxd &> sudo /dev/nullv
 then
     echo "# LXD is not yet installed"
     echo "# Installing LXD.."
     sudo apt -y update
     sudo apt install -y lxd
     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-    lxd init --preseed < lxdconfig.yaml
+    sudo lxd init --preseed < lxdconfig.yaml
     
 else
     echo "# LXC is here.."
