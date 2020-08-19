@@ -242,10 +242,9 @@ echo "#"
 #!/bin/bash
 
 
-
-if ! command -v lxd &> /dev/null
+if ! command -v lxd &> /dev/nullv
 then
-    echo "# LXC is not yet installed"
+    echo "# LXD is not yet installed"
     echo "# Installing LXD.."
     sudo apt -y update
     sudo apt install -y lxd
@@ -254,6 +253,9 @@ then
     
 else
     echo "# LXC is here.."
+    echo "# Loading LXD Yaml config file.."
+    wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
+    lxd init --preseed < lxdconfig.yaml
 fi
 
 
@@ -267,6 +269,7 @@ then
 else
     echo "# Ansible is here.."
 fi
+
 
 
 
