@@ -250,7 +250,6 @@ then
     sudu apy -y upgrade
     sudo apt install -y lxd
     sudo adduser $(whoami) lxd
-    sudo newgrp lxd
     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
     lxd init --preseed < lxdconfig.yaml
     
@@ -260,7 +259,6 @@ else
     sudo apt update -y
     sudo apt upgrade -y
     sudo adduser $(whoami) lxd
-    sudo newgrp lxd
     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
     sudo lxd init --preseed < lxdconfig.yaml
 fi
