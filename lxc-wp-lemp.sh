@@ -242,7 +242,7 @@ echo "#"
 #!/bin/bash
 
 
-if ! command -v lxd &> /dev/nullv
+if ! command -v lxd &> sudo /dev/nullv
 then
     echo "# LXD is not yet installed"
     echo "# Installing LXD.."
