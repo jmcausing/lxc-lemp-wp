@@ -242,20 +242,25 @@ echo "#"
 #!/bin/bash
 
 
-if ! command -v sudo lxd &> sudo /dev/nullv
+if ! command -v lxd &> /dev/nullv
 then
     echo "# LXD is not yet installed"
     echo "# Installing LXD.."
     sudo apt -y update
+    sudu apy -y upgrade
     sudo apt install -y lxd
+    sudo adduser $(whoami) lxd
     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-    sudo lxd init --preseed < lxdconfig.yaml
+    lxd init --preseed < lxdconfig.yaml
     
 else
     echo "# LXC is here.."
     echo "# Loading LXD Yaml config file.."
+    sudo apt update -y
+    sudo apt upgrade -y
+    sudo adduser $(whoami) lxd
     wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-    lxd init --preseed < lxdconfig.yaml
+    sudo lxd init --preseed < lxdconfig.yaml
 fi
 
 
