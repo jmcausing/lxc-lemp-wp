@@ -13,9 +13,6 @@ zone=causingdesigns.net
 cloudflare_auth_email=xxxxx@gmail.com
 cloudflare_auth_key=xxxxxx
 
-
-
-
 #################### 
 # Start - Clean mode
 if [ "$1" == "clean" ]
@@ -220,61 +217,51 @@ fi
     echo "# Done!"
     exit 1
 fi
-
 # END - Clean mode
 ################## 
 
 
 
-
-
-
-
 echo "# Hello! Enter the LXC container name please:"
-
 read -p "# Enter LXC name: " lxcname
-
 echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
 echo "#"
 echo "#"
 
-
-#!/bin/bash
-
-
-if ! command -v lxd &> sudo /dev/nullv
+# LXD check profile and permission
+if [[ $(lxc profile show default | grep "devices: {}") ]]; 
 then
-    echo "# LXD is not yet installed"
-    echo "# Installing LXD.."
-    sudo apt -y update
-    sudu apy -y upgrade
-    sudo apt install -y lxd
-    sudo adduser $(whoami) lxd
-    wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-    lxd init --preseed < lxdconfig.yaml
-    
+    if [[ $(groups $(whoami) | grep "lxd") ]];  
+    then
+        echo "# You are a member of LXD group!"
+        echo "#"
+        echo "# Downloading and applying LXD config.."
+        wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
+        sudo lxd init --preseed < lxdconfig.yaml
+        rm lxdconfig.yaml       
+    else
+        echo "# You are NOT a member of LXD Group.."
+        echo "#"
+        echo "# Adding this user $(whoami) to LXD group. Please run this script again!" 
+        sudo adduser $(whoami) lxd
+        newgrp lxd
+    fi
 else
-    echo "# LXC is here.."
-    echo "# Loading LXD Yaml config file.."
-    sudo apt update -y
-    sudo apt upgrade -y
-    sudo adduser $(whoami) lxd
-    wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-    sudo lxd init --preseed < lxdconfig.yaml
+   echo "LXD is already configured. Let's proceed."
 fi
 
 
+# Check if Ansible app exist. If not, then install.
 if ! command -v ansible &> /dev/null
 then
     echo "# Ansible is not yet installed"
     echo "# Installing Ansible.."
-    sudo apt -y update
-    sudo apt -y install ansible
+    sudo apt -y update -q
+    sudo apt -y install ansible -q
     
 else
     echo "# Ansible is here.."
 fi
-
 
 
 
@@ -653,3 +640,4 @@ echo "#"
 echo "#"
 echo "# Visit your WordPress site using this link: http://$cfdomain.causingdesigns.net"
 echo "# Thank you for using LXC LEMP + WordPress setup!"
+
