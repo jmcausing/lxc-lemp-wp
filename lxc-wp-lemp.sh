@@ -298,10 +298,22 @@ cloudflare_auth_key=xxxxxxx
       then
          echo "# You are a member of LXD group!"
          echo "#"
-         echo "# Downloading and applying LXD config.."
-         wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
-         sudo lxd init --preseed < lxdconfig.yaml
-         rm lxdconfig.yaml       
+         echo "# Applying LXD config.."
+         lxd waitready
+         cat <<EOF | lxd init
+         no
+         yes
+         default
+         dir
+         no
+         yes
+         lxdbr0
+         auto
+         none
+         no
+         yes
+         no
+         EOF      
       else
          echo "# You are NOT a member of LXD Group.."
          echo "#"
