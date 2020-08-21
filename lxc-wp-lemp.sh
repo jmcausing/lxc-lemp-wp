@@ -10,8 +10,8 @@ zone=causingdesigns.net
 
 ## Cloudflare authentication details
 ## keep these private
-cloudflare_auth_email=johnmarkcausing@gmail.com
-cloudflare_auth_key=30ddbf8bf37ae47bd84b0af2d9786553f7953
+cloudflare_auth_email=xxxx@xxx.com
+cloudflare_auth_key=xxxxxxx
 
 
 
