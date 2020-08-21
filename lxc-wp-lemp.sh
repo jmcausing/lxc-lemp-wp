@@ -373,17 +373,17 @@ cloudflare_auth_key=xxxxxxx
       echo "# "
       echo "# HAProxy is now installed!"
       # Flushing IP Tables
-      echo "# Flushing iptables rules..."
-      sleep 1
-      sudo iptables -F
-      sudo iptables -X
-      sudo iptables -t nat -F
-      sudo iptables -t nat -X
-      sudo iptables -t mangle -F
-      sudo iptables -t mangle -X
-      sudo iptables -P INPUT ACCEPT
-      sudo iptables -P FORWARD ACCEPT
-      sudo iptables -P OUTPUT ACCEPT
+      # echo "# Flushing iptables rules..."
+      #sleep 1
+      # sudo iptables -F
+      # sudo iptables -X
+      # sudo iptables -t nat -F
+      # sudo iptables -t nat -X
+      # sudo iptables -t mangle -F
+      # sudo iptables -t mangle -X
+      # sudo iptables -P INPUT ACCEPT
+      # sudo iptables -P FORWARD ACCEPT
+      # sudo iptables -P OUTPUT ACCEPT
       # Adding IP tables for HAProxy 
       echo "#"
       echo "# Inserting new IP tables for HAProxy"
