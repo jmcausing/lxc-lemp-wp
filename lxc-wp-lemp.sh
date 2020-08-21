@@ -13,6 +13,27 @@ zone=causingdesigns.net
 cloudflare_auth_email=xxxxx@gmail.com
 cloudflare_auth_key=xxxxxx
 
+echo "#"
+echo "# Testing Cloudflare connection.."
+# Get the zone id for the requested zone
+zoneid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone&status=active" \
+-H "X-Auth-Email: $cloudflare_auth_email" \
+-H "X-Auth-Key: $cloudflare_auth_key" \
+-H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+echo "# Zoneid for $zone is $zoneid"
+echo "#"
+dnsrecord=$item
+
+# Get the DNS record ID
+dnsrecordid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records?type=A&name=$dnsrecord.${zone}" \
+   -H "X-Auth-Email: $cloudflare_auth_email" \
+   -H "X-Auth-Key: $cloudflare_auth_key" \
+   -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+echo "# DNS record ID for $dnsrecord is $dnsrecordid" 
+
+
 #################### 
 # Start - Clean mode
 if [ "$1" == "clean" ]
@@ -132,7 +153,7 @@ then
                -H "X-Auth-Key: $cloudflare_auth_key" \
                -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
 
-               echo "# DNS record ID for $dnsrecord is $dnsrecordid" 
+            echo "# DNS record ID for $dnsrecord is $dnsrecordid" 
 
             # Delete DNS records
             echo "# Deleting $dnsrecord dns record.."
@@ -228,6 +249,18 @@ echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
 echo "#"
 echo "#"
 
+echo "# Checking for apt update and upgrades.."
+if [[ $(sudo apt list --upgradeable | grep ubuntu) ]];
+then   
+    echo "# There's an upgrade available."
+    echo "# Updating and upgrading now.. - apt update && apt upgrade"
+    sudo apt -y update -qq
+    sudo apt -y upgrade -qq
+else
+    echo "# No upgrades needed.."
+fi
+
+
 # LXD check profile and permission
 if [[ $(lxc profile show default | grep "devices: {}") ]]; 
 then
@@ -247,9 +280,9 @@ then
         newgrp lxd
     fi
 else
-   echo "LXD is already configured. Let's proceed."
+   echo "# LXD is already configured. Let's proceed."
 fi
-
+   
 
 # Check if Ansible app exist. If not, then install.
 if ! command -v ansible &> /dev/null
@@ -640,4 +673,3 @@ echo "#"
 echo "#"
 echo "# Visit your WordPress site using this link: http://$cfdomain.causingdesigns.net"
 echo "# Thank you for using LXC LEMP + WordPress setup!"
-
