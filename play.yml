@@ -16,13 +16,13 @@
 
     # -- START Install Required repo and updates.
     # Required for PHP FPM
-    - apt_repository:
-        repo: ppa:ondrej/php
+    - name: Flush Privileges
+      shell: "sudo add-apt-repository ppa:ondrej/php"
 
-    # Update repo and cache
-    - name:  Update repository
-      apt: name={{ item }} update_cache=yes state=latest
-      loop: [ 'software-properties-common' ]
+    # Apt Update
+    - name: Apt Update
+      shell: "apt-get update --allow-releaseinfo-change -y -q"
+
 
     # Installing packages: 'nginx', 'mariadb-server', 'python3-pymysql', 'python3-pip', 'python3-mysqldb'
     - name: Install LEMP Packages [nginx, mysq-server, python3-pymysql']
