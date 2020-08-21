@@ -1,4 +1,5 @@
 config: {}
+cluster: null
 networks:
 - config:
     ipv4.address: auto
@@ -13,8 +14,7 @@ storage_pools:
   name: default
   driver: dir
 profiles:
-- config:
-    security.privileged: "true"
+- config: {}
   description: ""
   devices:
     eth0:
@@ -27,4 +27,3 @@ profiles:
       pool: default
       type: disk
   name: default
-cluster: null
