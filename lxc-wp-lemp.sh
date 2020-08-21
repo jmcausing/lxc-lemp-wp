@@ -10,28 +10,11 @@ zone=causingdesigns.net
 
 ## Cloudflare authentication details
 ## keep these private
-cloudflare_auth_email=xxxxx@gmail.com
-cloudflare_auth_key=xxxxxx
+cloudflare_auth_email=johnmarkcausing@gmail.com
+cloudflare_auth_key=30ddbf8bf37ae47bd84b0af2d9786553f7953
 
-echo "#"
-echo "# Testing Cloudflare connection.."
-# Get the zone id for the requested zone
-zoneid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone&status=active" \
--H "X-Auth-Email: $cloudflare_auth_email" \
--H "X-Auth-Key: $cloudflare_auth_key" \
--H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
 
-echo "# Zoneid for $zone is $zoneid"
-echo "#"
-dnsrecord=$item
 
-# Get the DNS record ID
-dnsrecordid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records?type=A&name=$dnsrecord.${zone}" \
-   -H "X-Auth-Email: $cloudflare_auth_email" \
-   -H "X-Auth-Key: $cloudflare_auth_key" \
-   -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
-
-echo "# DNS record ID for $dnsrecord is $dnsrecordid" 
 
 
 #################### 
@@ -249,6 +232,20 @@ echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
 echo "#"
 echo "#"
 
+
+echo "#"
+echo "# Testing Cloudflare connection.."
+# Get the zone id for the requested zone
+zoneid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone&status=active" \
+-H "X-Auth-Email: $cloudflare_auth_email" \
+-H "X-Auth-Key: $cloudflare_auth_key" \
+-H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+echo "# Zoneid for $zone is $zoneid"
+echo "#"
+
+
+# Upgrades are needed for Ansible to work
 echo "# Checking for apt update and upgrades.."
 if [[ $(sudo apt list --upgradeable | grep ubuntu) ]];
 then   
