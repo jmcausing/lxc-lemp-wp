@@ -16,7 +16,6 @@ cloudflare_auth_key=xxxxxxx
 
 
 
-
 #################### 
 # Start - Clean mode
 if [ "$1" == "clean" ]
@@ -233,6 +232,20 @@ echo "#"
 echo "#"
 
 
+   
+# Check if jq app exist. If not, then install.
+if ! command -v jq &> /dev/null
+then
+    echo "# jq is not yet installed"
+    echo "# Installing jq.."
+    sudo apt -y update -qq
+    sudo apt -y install ansible -qq
+    
+else
+    echo "# jq is here.."
+fi
+
+
 echo "#"
 echo "# Testing Cloudflare connection.."
 # Get the zone id for the requested zone
@@ -279,7 +292,7 @@ then
 else
    echo "# LXD is already configured. Let's proceed."
 fi
-   
+
 
 # Check if Ansible app exist. If not, then install.
 if ! command -v ansible &> /dev/null
