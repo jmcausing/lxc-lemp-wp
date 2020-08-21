@@ -16,7 +16,7 @@
 
     # -- START Install Required repo and updates.
     # Required for PHP FPM
-    - name: Flush Privileges
+    - name: sudo add-apt-repository ppa:ondrej/ph
       shell: "sudo add-apt-repository ppa:ondrej/php"
 
     # Apt Update
