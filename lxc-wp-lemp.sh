@@ -231,6 +231,11 @@ cloudflare_auth_key=xxxxxxx
    echo "#"
    echo "#"
 
+   echo "# Let's update.. (apt install update)"
+   echo "#"
+   sudo apt -y update -qq
+   
+   
    echo "# Checking required apps.."
 
    # Check if jq app exist. If not, then install.
@@ -238,7 +243,7 @@ cloudflare_auth_key=xxxxxxx
    then
       echo "# jq is not yet installed"
       echo "# Installing jq.."
-      sudo apt -y update -qq
+      echo "#"
       sudo apt -y install jq -qq
       
    else
@@ -251,8 +256,8 @@ cloudflare_auth_key=xxxxxxx
    then
       echo "# Ansible is not yet installed"
       echo "# Installing Ansible.."
-      sudo apt -y update -q
-      sudo apt -y install ansible -q
+      sudo apt -y update -qq
+      sudo apt -y install ansible -qq
       
    else
       echo "# Ansible is here.."
