@@ -239,7 +239,7 @@ then
     echo "# jq is not yet installed"
     echo "# Installing jq.."
     sudo apt -y update -qq
-    sudo apt -y install ansible -qq
+    sudo apt -y install jq -qq
     
 else
     echo "# jq is here.."
