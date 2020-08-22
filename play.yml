@@ -129,7 +129,6 @@
 
 
     - name: set PHP memory limit
-        become: yes
         ini_file:
         path: /etc/php/7.3/fpm/php.ini
         section: PHP
@@ -138,7 +137,6 @@
 
 
     - name: set PHP post_max_size
-        become: yes
         ini_file:
         path: /etc/php/7.3/fpm/php.ini
         section: PHP
@@ -146,7 +144,6 @@
         value: 64M
 
     - name: set PHP upload_max_filesize
-        become: yes
         ini_file:
         path: /etc/php/7.3/fpm/php.ini
         section: PHP
@@ -155,7 +152,6 @@
 
         
     - name: set PHP max_execution_time
-        become: yes
         ini_file:
         path: /etc/php/7.3/fpm/php.ini
         section: PHP
