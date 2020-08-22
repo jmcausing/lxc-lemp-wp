@@ -129,37 +129,37 @@
 
 
     - name: set PHP memory limit
-        ini_file:
-        path: /etc/php/7.3/fpm/php.ini
-        section: PHP
-        option: memory_limit
-        value: 512M
+      ini_file:
+          path: /etc/php/7.3/fpm/php.ini
+          section: PHP
+          option: memory_limit
+          value: 512M
 
 
     - name: set PHP post_max_size
-        ini_file:
-        path: /etc/php/7.3/fpm/php.ini
-        section: PHP
-        option: post_max_size
-        value: 64M
+      ini_file:
+          path: /etc/php/7.3/fpm/php.ini
+          section: PHP
+          option: post_max_size
+          value: 64M
 
     - name: set PHP upload_max_filesize
-        ini_file:
-        path: /etc/php/7.3/fpm/php.ini
-        section: PHP
-        option: upload_max_filesize
-        value: 100M
+      ini_file:
+          path: /etc/php/7.3/fpm/php.ini
+          section: PHP
+          option: upload_max_filesize
+          value: 100M
 
         
     - name: set PHP max_execution_time
-        ini_file:
-        path: /etc/php/7.3/fpm/php.ini
-        section: PHP
-        option: max_execution_time
-        value: 300
+      ini_file:
+          path: /etc/php/7.3/fpm/php.ini
+          section: PHP
+          option: max_execution_time
+          value: 300
         
     - name: Restart PHP FPM
-        shell: "sudo systemctl restart php7.3-fpm.service"         
+      shell: "sudo systemctl restart php7.3-fpm.service"         
 
     # WordPress Configuration and permission -
     # -- END
