@@ -687,13 +687,17 @@ cloudflare_auth_key=xxxxxxx
    lxc exec haproxy -- sh -c "sudo systemctl reload haproxy"
 
    lxc exec haproxy cat /etc/haproxy/haproxy.cfg | grep ${lxcname}_
+
+   echo "#"
+   echo "#"
    echo "# Insert nginx config client_max_body_size 100M;"
    lxc exec ${lxcname} -- sh -c "sed -i  '/^http {/a\        client_max_body_size 100M;'  /etc/nginx/nginx.conf"
 
+   echo "#"
+   echo "#"
    echo "# Test and reload nginx;"
-   lxc exec ${lxcname} -- sh -c "nginx -t;sudo systemctl restart php7.3-fpm.service"  
-   echo "#"
-   echo "#"
+   lxc exec ${lxcname} -- sh -c "nginx -t;sudo systemctl restart nginx" 
+
    echo "#"
    echo "#"
    echo "#"
