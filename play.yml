@@ -127,16 +127,6 @@
         owner: www-data
         group: www-data
 
-    - name: Verify Nginx config
-        become: yes
-        command: nginx -t
-        changed_when: false
-
-    - name: Reload Nginx
-        become: yes
-        command: systemctl reload nginx
-        changed_when: false
-
 
     - name: set PHP memory limit
         become: yes
