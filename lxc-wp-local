@@ -1,237 +1,440 @@
-#### LXC + LEMP + WordPress by generator by John Mark C.
-#
-# LXD verson is good. 4.0.2. Let's proceed!
-# Hello! Enter the LXC container name please:
-# Enter LXC name: WP
-# Alright! Let's generate the LXC container Ubuntu 18.04: WP
-#
-#
-# Make sure you run this from your local laptop/machine FIRST
-# ssh-keygen -f ~/.ssh/WP
-# Are you done generating SSH key? Paste the public key here of WP.pub
-# Enter PUBLIC KEY WP.pub : ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCVByq0lDRHrJ8XtX/eZXbRUqXOfWld4ypDEKwAovb+TYoT/TYeHavzx2CEyiA++yZfPfF0n8kE8uB9N+Z1PeX9DTB2Mmd/TQnrBXxLTv5ByJPHeTkUjjU7xIgxzQxup7xDCoo3r6t+5YwIZThIUGC5R9Oix0/fCkOeHdN4PkTQEyrsWD1VX3YLbsSqK/v0H2AUhq3Zufcg5n10pZ3iWj0AoV0GE/ugtxIZUjk1+mQArfVY50K3I8+iNcX4tWwJMKqTen660qZyGpSKv5pcSA5ojvl+DpdqgwBczEJfNPMMXHhObqVqm4V1JGOnBRZZNxGLD1u7q9sZob3fysyIOGtkYOkE8nmyH+Ec+OGBoTcZwMAKr8znKhqO3ENcJrFs4CWERKKUmZAM/FWprl1VVqnVACztcQYI4Ld3iq42CmKupfYiAUKGyQtlm0Vy4kP+Qvv1YunA/kr014qIi2aSW+6jmk9Q6UK2+NqdEDzrvG9ijvkTh7W4lwXSyqVLoy05mxU= johnmarkcausing@Johns-MacBook-Pro.local
-# Let's update.. (apt install update)
-#
-All packages are up to date.
-# Checking required apps..
-# jq is here..
-# Ansible is here..
-# Checking for apt update and upgrades..
+#!/bin/bash
 
-WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+webport=8$(( $RANDOM % 10 + 909 ))
+sshport=2$(( $RANDOM % 10 + 909 ))
+hostip=$(hostname -I | cut -d' ' -f1)
 
-# No upgrades needed..
-# LXD is already configured. Let's proceed.
-Creating WP
-Starting WP                                
-#
-# Let's generate SSH-KEY gen for this LXC
-#
-Generating public/private rsa key pair.
-Your identification has been saved in /home/ubuntu/.ssh/id_lxc_WP
-Your public key has been saved in /home/ubuntu/.ssh/id_lxc_WP.pub
-The key fingerprint is:
-SHA256:Qtvsz8CoHH7/HOdwaFNyV83xffr62s4ryJBwXVKZngM key for local LXC
-The key's randomart image is:
-+---[RSA 3072]----+
-|            ..o. |
-|           E + .=|
-|      .   . = . B|
-|     . = . . + o.|
-|      o S o o +  |
-|       = o = . . |
-|    . . + O +   .|
-|   o o.  * X . + |
-|    +. ...= . +=*|
-+----[SHA256]-----+
-#
-# - START - Details from ssh key gen
-#
-#
-# START - Info of LXC: WP
-#
-# Trying to get the LXC IP Address..
-/
-# IP Address found!  WP LXC IP: 10.149.35.128
-# 
-# Checking status of LXC list again..
-+------+---------+----------------------+-----------------------------------------------+-----------+-----------+
-| NAME |  STATE  |         IPV4         |                     IPV6                      |   TYPE    | SNAPSHOTS |
-+------+---------+----------------------+-----------------------------------------------+-----------+-----------+
-| WP   | RUNNING | 10.149.35.128 (eth0) | fd42:7afb:acff:8bcc:216:3eff:fedc:a083 (eth0) | CONTAINER | 0         |
-+------+---------+----------------------+-----------------------------------------------+-----------+-----------+
-# Sending public key to target LXC:  WP
-#
-######## lxc file push /home/ubuntu/.ssh/id_lxc_WP.pub WP/root/.ssh/authorized_keys --verbose
-INFO[08-26|20:35:25] Pushing /var/lib/snapd/hostfs/home/ubuntu/.ssh/id_lxc_WP.pub to /root/.ssh/authorized_keys (file) 
-#                                                                                                            
-# Fixing root permission for authorized_keys file
-#
-mode of '/root/.ssh/authorized_keys' changed from 0644 (rw-r--r--) to 0600 (rw-------)
-changed ownership of '/root/.ssh/authorized_keys' from ubuntu:ubuntu to root:root
-#
-# Adding SSH-key for this host so we can SSH to the target LXC.
-#
-Agent pid 124189
-Identity added: /home/ubuntu/.ssh/id_lxc_WP (key for local LXC)
-#
-# Adding local machine puiblic key to LXC
-# Done! Ready to connect?
-#
-# Connect to this: ssh -i ~/.ssh/id_lxc_WP root@10.149.35.128
-#
-#
-#
-# default does not exist.
-# Downloading a fresh nginx default config file
-#
-#
-# vars.yml does not exist.
-# Downloading a fresh nginx default config file
-#
-#
-ansible_wpconfig.php does not exist.
-# Downloading a fresh nginx default config file
-#
-#
-play.yml does not exist.
-# Downloading a fresh nginx default config file
-#
-# Checking files..
--rw-rw-r-- 1 ubuntu ubuntu 5261 Aug 26 20:35 WP_lemp.yml
--rw-rw-r-- 1 ubuntu ubuntu 42 Aug 26 20:35 WP_hosts
--rw-rw-r-- 1 ubuntu ubuntu 260 Aug 26 20:35 vars.yml
-#
-#
-# Running playbook with this command:
-#
-# ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook WP_lemp.yml -i WP_hosts --private-key=/home/ubuntu/.ssh/id_lxc_WP
-#
+clear
+echo "#### LXC + LEMP + WordPress by generator by John Mark C."
+echo "#"
 
-PLAY [all] *************************************************************************************************************
+   # Checking LXD version.  Version 3 will continue. Version 2 will exit!
+   if [[ !$(sudo lxd --version | grep 2.) ]]; 
+   then
+      echo "# LXD verson is good. $(sudo lxd --version). Let's proceed!"
 
-TASK [Gathering Facts] *************************************************************************************************
-ok: [10.149.35.128]
+   else
+      echo "Please run LXD version 3 or up to proceed to add proxy device!!"
+      echo "#"
+      exit
+   fi
 
-TASK [sudo add-apt-repository ppa:ondrej/ph] ***************************************************************************
-[WARNING]: Consider using 'become', 'become_method', and 'become_user' rather than running sudo
-changed: [10.149.35.128]
-
-TASK [Apt Update] ******************************************************************************************************
-[WARNING]: Consider using the apt module rather than running 'apt-get'.  If you need to use command because apt is
-insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid
-of this message.
-changed: [10.149.35.128]
-
-TASK [Install LEMP Packages [nginx, mysq-server, python3-pymysql']] ****************************************************
-changed: [10.149.35.128] => (item=nginx)
-changed: [10.149.35.128] => (item=mariadb-server)
-changed: [10.149.35.128] => (item=python3-mysqldb)
-
-TASK [Sets the root password] ******************************************************************************************
-[WARNING]: Module did not set no_log for update_password
-changed: [10.149.35.128]
-
-TASK [Create a new database with name 'wordpress'] *********************************************************************
-changed: [10.149.35.128]
-
-TASK [Create database user with password and all database privileges and 'WITH GRANT OPTION'] **************************
-[WARNING]: Module did not set no_log for update_********
-changed: [10.149.35.128]
-
-TASK [Flush Privileges] ************************************************************************************************
-changed: [10.149.35.128]
-
-TASK [Installing PHP 7.3 extension] ************************************************************************************
-changed: [10.149.35.128] => (item=php7.3-fpm)
-ok: [10.149.35.128] => (item=php7.3-common)
-changed: [10.149.35.128] => (item=php7.3-mysql)
-changed: [10.149.35.128] => (item=php7.3-curl)
-ok: [10.149.35.128] => (item=php7.3-json)
-changed: [10.149.35.128] => (item=php7.3-mbstring)
-changed: [10.149.35.128] => (item=php7.3-xml)
-changed: [10.149.35.128] => (item=php7.3-zip)
-changed: [10.149.35.128] => (item=php7.3-gd)
-changed: [10.149.35.128] => (item=php7.3-soap)
-changed: [10.149.35.128] => (item=php7.3-ssh2)
-ok: [10.149.35.128] => (item=php7.3-tokenizer)
-
-TASK [Sets / copy Nginx conf file] *************************************************************************************
-changed: [10.149.35.128]
-
-TASK [Test and reload Nginx] *******************************************************************************************
-changed: [10.149.35.128]
-
-TASK [Download and unpack latest WordPress] ****************************************************************************
-changed: [10.149.35.128]
-
-TASK [Remove old html and replace with with WP files] ******************************************************************
-[WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command
-because file is insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in
-ansible.cfg to get rid of this message.
-changed: [10.149.35.128]
-
-TASK [Set ownership] ***************************************************************************************************
-changed: [10.149.35.128]
-
-TASK [Set permissions for directories] *********************************************************************************
-changed: [10.149.35.128]
-
-TASK [Set permissions for files] ***************************************************************************************
-changed: [10.149.35.128]
-
-TASK [Set up wp-config] ************************************************************************************************
-changed: [10.149.35.128]
-
-TASK [set PHP memory limit] ********************************************************************************************
-changed: [10.149.35.128]
-
-TASK [set PHP post_max_size] *******************************************************************************************
-changed: [10.149.35.128]
-
-TASK [set PHP upload_max_filesize] *************************************************************************************
-changed: [10.149.35.128]
-
-TASK [set PHP max_execution_time] **************************************************************************************
-[WARNING]: The value 300 (type int) in a string field was converted to '300' (type string). If this does not look like
-what you expect, quote the entire value to ensure it does not change.
-changed: [10.149.35.128]
-
-TASK [Restart PHP FPM] *************************************************************************************************
-changed: [10.149.35.128]
-
-PLAY RECAP *************************************************************************************************************
-10.149.35.128              : ok=22   changed=21   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+   #################### 
+   # Start - Clean mode
+   if [ "$1" == "clean" ]
+   then
+      # play.yml file check
+      FILE=*.yml
+      if ls $FILE 1> /dev/null 2>&1; then
+         echo "#"
+         echo "# $FILE exists. Deleting..!"
+         rm $FILE 
+      else 
+         echo "#"
+         echo "# $FILE does not exist. Already clean!"
+      fi
 
 
-real    2m52.088s
-user    0m23.395s
-sys     0m10.538s
-Device webport8913 added to WP
-Device sshport2917 added to WP
-#
-#
-# Insert nginx config client_max_body_size 100M;
-#
-#
-# Test and reload nginx;
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-#
-#
-# Connecto to your local site using this http://192.168.64.4:8913
-# Connect to this: ssh -i ~/.ssh/WP -p 2917 root@192.168.64.4
-#
-#
-#
-# Add this also to your ssh config file (like if you are using Visual Code Studio for remote SSH)
-Host WP
-    User root
-   Hostname 192.168.64.4
-   Port 2917
-   PreferredAuthentications publickey
-   IdentityFile ~/.ssh/WP
-#
-#
-# Thank you for using LXC LEMP + WordPress setup!
-ubuntu@primary:~$ 
+      # ansible_wpconfig.php file check
+      FILE=ansible_wpconfig.php
+      if [ -f "$FILE" ]; then
+         echo "# $FILE exists. Deleting..!"
+         rm $FILE 
+      else 
+         echo "# $FILE does not exist. Already clean!"
+      fi
+
+
+
+      
+      # host file check
+      if ls *host* 1> /dev/null 2>&1; then
+         echo "# Hosts file do exist. Deleting!"
+         rm *host*
+      else
+         echo "# Hosts file is already clean!"
+      fi
+
+      # playbook retry file check
+      if ls *retry* 1> /dev/null 2>&1; then
+         echo "# playbook retry file do exist. Deleting!"
+         rm *retry*
+      else
+         echo "# Hosts file is already clean!"
+      fi 
+
+
+      # default nginx file check
+      FILE=default
+      if [ -f "$FILE" ]; then
+         echo "# $FILE nginx config exists. Deleting..!"
+         rm $FILE 
+         
+      else 
+         echo "# $FILE nginx config file does not exist. Already clean!"
+      fi
+
+
+      #  - START - Clean up ssh keys with lxc string
+      #
+      if [[ $(ls $HOME/.ssh/ | grep lxc) ]]; 
+      then
+         echo "# LXC ssh files found! Deleting.."
+         rm $HOME/.ssh/*lxc*
+      else
+         echo "# No LXC SSH key found. Already clean!"
+      fi
+      #
+      # - END -  Clean up ssh keys with lxc string
+
+
+      #  - START - Clean up LXC containers
+      #
+   if [[ $(lxc list | awk '!/NAME/{print $2}') ]]; 
+   then
+      echo "# LXC Containers found! Deleting.."+
+
+
+      lxc_list=$(lxc list | awk '!/NAME/{print $2}' | awk NF)
+
+      # Setting up array for list of LXC
+      lxc_list_array=($lxc_list)
+      # Marking lxc not for deletion
+      # This is was haproxy keyword
+      dont_delete=xxxxxxx
+      for item in "${lxc_list_array[@]}"; do
+         if [[ $dont_delete == "$item" ]]; 
+         then 
+            echo "# $item is found! This is your proxy container. NEVER DELETE!"
+         else
+            echo "# Deleting LXC $item... (FORCED)"
+            lxc delete $item --force
+
+         fi
+      done
+
+   else
+   echo "# No LXC Containers found. Already clean!"
+   fi   
+      #
+      # - END -   Clean up LXC containers
+
+      lxc list
+      ls -al $HOME/.ssh/
+      echo "#"
+      echo "# Done!"
+      exit 1
+   fi
+   # END - Clean mode
+   ################## 
+
+
+
+   echo "# Hello! Enter the LXC container name please:"
+   read -p "# Enter LXC name: " lxcname
+   echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
+   echo "#"
+   echo "#"
+   echo "# Make sure you run this from your local laptop/machine FIRST"
+   echo "# ssh-keygen -f ~/.ssh/$lxcname"
+   echo "# Are you done generating SSH key? Paste the public key here of $lxcname.pub"
+   read -p "# Enter PUBLIC KEY $lxcname.pub : " lxcpub
+
+
+   echo "# Let's update.. (apt install update)"
+   echo "#"
+   sudo apt -y update -qq
+   
+   
+   echo "# Checking required apps.."
+
+   # Check if jq app exist. If not, then install.
+   if ! command -v jq &> /dev/null
+   then
+      echo "# jq is not yet installed"
+      echo "# Installing jq.."
+      echo "#"
+      sudo apt -y install jq -qq
+      
+   else
+      echo "# jq is here.."
+   fi
+
+
+   # Check if Ansible app exist. If not, then install.
+   if ! command -v ansible &> /dev/null
+   then
+      echo "# Ansible is not yet installed"
+      echo "# Installing Ansible.."
+      sudo apt -y update -qq
+      sudo apt -y install ansible -qq
+      
+   else
+      echo "# Ansible is here.."
+   fi
+
+
+   # Upgrades are needed for Ansible to work
+   echo "# Checking for apt update and upgrades.."
+   if [[ $(sudo apt list --upgradeable | grep ubuntu) ]];
+   then   
+      echo "# There's an upgrade available."
+      echo "# Updating and upgrading now.. - apt update && apt upgrade"
+      sudo apt -y update -qq
+      sudo apt -y upgrade -qq
+   else
+      echo "# No upgrades needed.."
+   fi
+
+
+   # LXD check profile and permission
+   if [[ $(lxc profile show default | grep "devices: {}") ]]; 
+   then
+      if [[ $(groups $(whoami) | grep "lxd") ]];  
+      then
+         echo "# You are a member of LXD group!"
+         echo "# Downloading and applying LXD config.."
+         wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/lxdconfig.yaml
+         sudo lxd init --preseed < lxdconfig.yaml
+         rm lxdconfig.yaml   
+      else
+         echo "# You are NOT a member of LXD Group.."
+         echo "#"
+         echo "# Adding this user $(whoami) to LXD group. Please run this script again!" 
+         sudo adduser $(whoami) lxd
+         newgrp lxd
+      fi
+   else
+      echo "# LXD is already configured. Let's proceed."
+   fi
+      
+
+   # 18.04
+   lxc launch ubuntu:18.04 $lxcname
+
+   # 16.04
+   #lxc launch ubuntu:16.04 $lxcname
+
+
+
+
+   echo "#"
+   echo "# Let's generate SSH-KEY gen for this LXC"
+   echo "#"
+   ssh-keygen -f $HOME/.ssh/id_lxc_$lxcname -N '' -C 'key for local LXC'
+
+   echo "#"
+   echo "# - START - Details from ssh key gen"
+
+   # ls $HOME/.ssh/
+   # cat $HOME/.ssh/id_lxc_$lxcname.pub
+
+
+   echo "#"
+   echo "#"
+   echo "# START - Info of LXC: ${lxcname}"
+
+
+   echo "#"
+   echo "# Trying to get the LXC IP Address.."
+
+
+   LXC_IP=$(lxc list | grep ${lxcname} | awk '{print $6}')
+
+
+   VALID_IP=^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$
+
+
+   # START - SPINNER 
+   #
+   sp="/-\|"
+   sc=0
+   spin() {
+      printf "\b${sp:sc++:1}"
+      ((sc==${#sp})) && sc=0
+   }
+   endspin() {
+      printf "\r%s\n" "$@"
+   }
+   #
+   # - END SPINNER
+
+
+   while ! [[ "${LXC_IP}" =~ ${VALID_IP} ]]; do
+   # sleep 1
+   #  echo "LXC ${lxcname} has still no IP "
+   #  echo "Checking again.." 
+   #  echo "#"
+   #  echo "#"
+   #  lxc list
+      LXC_IP=$(lxc list | grep ${lxcname} | awk '{print $6}')
+      spin
+   #  echo "IP is: ${LXC_IP}"
+   done
+   endspin
+
+   echo "# IP Address found!  ${lxcname} LXC IP: ${LXC_IP}"
+   #lxc info $lxcname
+   echo "# "
+
+   echo "# Checking status of LXC list again.."
+   lxc list
+
+
+   echo "# Sending public key to target LXC: " ${lxcname}
+   echo "#"
+   #echo lxc file push $HOME/.ssh/id_lxc_${lxcname}.pub ${lxcname}/root/.ssh/authorized_keys
+
+   #Pause for 2 seconds to make sure we get the IP and push the file.
+   sleep 5
+
+   # Send SSH key file from this those to the target LXC
+   echo "######## lxc file push $HOME/.ssh/id_lxc_${lxcname}.pub ${lxcname}/root/.ssh/authorized_keys --verbose"
+   lxc file push $HOME/.ssh/id_lxc_${lxcname}.pub ${lxcname}/root/.ssh/authorized_keys --verbose
+
+   echo "#"
+   echo "# Fixing root permission for authorized_keys file"
+   echo "#"
+   lxc exec ${lxcname} -- chmod 600 /root/.ssh/authorized_keys --verbose
+   lxc exec ${lxcname} -- chown root:root /root/.ssh/authorized_keys --verbose
+   echo "#"
+   echo "# Adding SSH-key for this host so we can SSH to the target LXC."
+   echo "#"
+   eval $(ssh-agent); 
+   ssh-add $HOME/.ssh/id_lxc_$lxcname
+   echo "#"
+   echo "# Adding local machine puiblic key to LXC"
+   lxc exec ${lxcname} -- sh -c "echo $lxcpub >> ~/.ssh/authorized_keys" --verbose
+   echo "# Done! Ready to connect?"
+   echo "#"
+   echo "# Connect to this: ssh -i ~/.ssh/id_lxc_${lxcname} root@${LXC_IP}"
+   echo "#"
+   echo "#"
+
+   # ssh key variable location
+   SSHKEY=~/.ssh/id_lxc_${lxcname}
+
+   echo "[lxc]
+   ${LXC_IP} ansible_user=root "> ${lxcname}_hosts
+
+   # Downloading ansible files 
+   # Ansible playbook file check
+
+
+   # nginx default config file
+   FILE=default
+   if [ -f "$FILE" ]; then
+      echo "#"
+      echo "# $FILE exists. Deleting and downloading a fresh one!"
+      rm default
+      wget -q w https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/default
+      echo "#"
+      
+   else 
+      echo "#"
+      echo "# $FILE does not exist."
+      echo "# Downloading a fresh nginx default config file"
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/default
+      echo "#"
+   fi
+
+   # vars file check
+   FILE=vars.yml
+   if [ -f "$FILE" ]; then
+      echo "#"
+      echo "# $FILE exists. Deleting and downloading a fresh one!"
+      rm vars.yml
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/vars.yml
+      echo "#"
+      
+   else 
+      echo "#"
+      echo "# $FILE does not exist."
+      echo "# Downloading a fresh nginx default config file"
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/vars.yml
+      echo "#"
+   fi
+
+   # wp-config.php file check
+   FILE=ansible_wpconfig.php
+   if [ -f "$FILE" ]; then
+      echo "#"
+      echo "# $FILE exists. Deleting and downloading a fresh one!"
+      rm ansible_wpconfig.php
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/ansible_wpconfig.php
+      echo "#"
+      
+   else 
+      echo "#"
+      echo "$FILE does not exist."
+      echo "# Downloading a fresh nginx default config file"
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/ansible_wpconfig.php
+      echo "#"
+   fi
+
+   # Ansible playbook play.yml file check
+   FILE=play.yml
+   if [ -f "$FILE" ]; then
+      echo "#"
+      echo "# $FILE exists. Deleting and downloading a fresh one!"
+      rm play.yml
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/play.yml
+      mv play.yml ${lxcname}_lemp.yml
+      echo "#"
+      
+   else 
+      echo "#"
+      echo "$FILE does not exist."
+      echo "# Downloading a fresh nginx default config file"
+      wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/play.yml
+      mv play.yml ${lxcname}_lemp.yml
+      echo "#"
+   fi
+
+   echo "# Checking files.."
+   ls -al  ${lxcname}_lemp.yml
+   ls -al  ${lxcname}_hosts
+   ls -al vars.yml
+   echo "#"
+
+   echo "#"
+   echo "# Running playbook with this command:"
+   echo "#"
+   echo "# ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=${SSHKEY}"
+   echo "#"
+
+   time ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=~${SSHKEY} 
+
+   # Add proxy device
+   lxc config device add ${lxcname} webport$webport proxy listen=tcp:0.0.0.0:$webport connect=tcp:127.0.0.1:80
+   lxc config device add ${lxcname} sshport$sshport proxy listen=tcp:0.0.0.0:$sshport connect=tcp:127.0.0.1:22
+
+   echo "#"
+   echo "#"
+   echo "# Insert nginx config client_max_body_size 100M;"
+
+   lxc exec ${lxcname} -- sh -c "sed -i  '/^http {/a\        client_max_body_size 100M;'  /etc/nginx/nginx.conf"
+
+   echo "#"
+   echo "#"
+   echo "# Test and reload nginx;"
+
+   lxc exec ${lxcname} -- sh -c "nginx -t;sudo systemctl restart nginx" 
+
+   echo "#"
+   echo "#"
+   echo "# Connecto to your local site using this http://$hostip:$webport"
+   echo "# Connect to this: ssh -i ~/.ssh/${lxcname} -p $sshport root@$hostip"
+   echo "#"
+   echo "#"
+   echo "#"
+   echo "# Add this also to your ssh config file (like if you are using Visual Code Studio for remote SSH)"
+   echo "Host ${lxcname}"
+   echo  "    User root"
+   echo  "   Hostname $hostip"
+   echo  "   Port $sshport"
+   echo  "   PreferredAuthentications publickey"
+   echo  "   IdentityFile ~/.ssh/${lxcname}"
+   echo "#"
+   echo "#"
+   echo "# Thank you for using LXC LEMP + WordPress setup!"
