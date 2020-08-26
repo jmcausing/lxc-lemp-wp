@@ -17,7 +17,7 @@
     # -- START Install Required repo and updates.
     # Required for PHP FPM
     - name: sudo add-apt-repository ppa:ondrej/ph
-      shell: "sudo add-apt-repository ppa:ondrej/php"
+      shell: "sudo add-apt-repository ppa:ondrej/php -y"
 
     # Apt Update
     - name: Apt Update
