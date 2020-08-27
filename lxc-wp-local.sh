@@ -350,7 +350,7 @@ echo "#"
    else 
       echo "#"
       echo "# $FILE does not exist."
-      echo "# Downloading a fresh nginx default config file"
+      echo "# Downloading vars.yml for Ansible"
       wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/vars.yml
       echo "#"
    fi
