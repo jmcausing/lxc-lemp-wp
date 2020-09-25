@@ -1,15 +1,15 @@
 server {
-        listen 80 proxy_protocol;
-        listen [::]:80 proxy_protocol;
+    listen 80 proxy_protocol;
+    listen [::]:80 proxy_protocol;
 
-       # server_name nginx1.example.com;
+    # server_name nginx1.example.com;
 
-        location / {
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_pass http://nginx1.lxd;
-        }
+    location / {
+            proxy_set_header Host $host; 
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://nginx1.lxd;
+    }
 
-        real_ip_header proxy_protocol;
-        set_real_ip_from 127.0.0.1;
+    real_ip_header proxy_protocol;
+    set_real_ip_from 127.0.0.1;
 }
