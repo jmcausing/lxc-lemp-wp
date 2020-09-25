@@ -6,7 +6,7 @@ echo "#"
 zone=causingdesigns.net
 ## Cloudflare authentication details keep these private
 cloudflare_auth_email=####
-cloudflare_auth_key=#######
+cloudflare_auth_key=####
 
 
    #################### 
@@ -54,7 +54,7 @@ cloudflare_auth_key=#######
          echo "# playbook retry file do exist. Deleting!"
          rm *retry*
       else
-         echo "# Hosts file is already clean!"
+         echo "# playbook retry file is already clean!"
       fi 
 
 
@@ -86,7 +86,7 @@ cloudflare_auth_key=#######
       if [[ $(lxc list | awk '!/NAME/{print $2}') ]]; 
 
       then
-         echo "# Cloudflare DNS subdomain clean up"+
+         echo "# Cloudflare DNS subdomain clean up"
 
 
          lxc_list=$(lxc list | awk '!/NAME/{print $2}' | awk NF)
@@ -195,13 +195,16 @@ cloudflare_auth_key=#######
 
 
       # Cleaning sites from Reverse Proxy container
-      echo "# Cleaning  HAProxy config"
+      echo "# Cleaning Reverse Proxy LXC site files in /etc/nginx/sites-available/"
+      echo "# "
+      lxc exec rproxy -- sh -c "find /etc/nginx/sites-available/ ! -name default  -type f -delete" --verbose
 
-      echo "xxxx FIND A WAY TO CLEAN THIS UP"
-      echo "xxx Delete all files except 'default'"
-      echo "xxx then reload nginx"
+      
+      echo "# Cleaning Reverse Proxy LXC symlink site files in /etc/nginx/sites-enabled"
+      echo "# "
+      lxc exec rproxy -- sh -c "find /etc/nginx/sites-enabled/ ! -name default  -type l -delete" --verbose
 
-      echo "# Done! HAProxy is now clean!!" 
+      echo "# Done! Reverse Proxy container is now clean!!" 
       echo "#"
 
       lxc list
@@ -212,10 +215,6 @@ cloudflare_auth_key=#######
    fi
    # END - Clean mode
    ################## 
-
-
-
-
 
 
    echo "# Hello! Enter the LXC container name please:"
