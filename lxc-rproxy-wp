@@ -6,7 +6,7 @@ echo "#"
 zone=causingdesigns.net
 ## Cloudflare authentication details keep these private
 cloudflare_auth_email=####
-cloudflare_auth_key=####
+cloudflare_auth_key=#######
 
 
    #################### 
@@ -95,7 +95,7 @@ cloudflare_auth_key=####
          lxc_list_array=($lxc_list)
 
          # Marking lxc not for deletion
-         dont_delete=haproxy
+         dont_delete=rproxy
 
          # Start loop
          for item in "${lxc_list_array[@]}"; do
@@ -166,7 +166,7 @@ cloudflare_auth_key=####
    if [[ $(lxc list | awk '!/NAME/{print $2}') ]]; 
    then
       echo "# LXC Containers found! Deleting.."+
-      if [[  $(lxc list | awk '!/NAME/{print $2}') == *"haproxy"* ]]; then
+      if [[  $(lxc list | awk '!/NAME/{print $2}') == *"rproxy"* ]]; then
       echo "# There's a proxy container.."
       fi
       lxc_list=$(lxc list | awk '!/NAME/{print $2}' | awk NF)
@@ -174,11 +174,11 @@ cloudflare_auth_key=####
       # Setting up array for list of LXC
       lxc_list_array=($lxc_list)
       # Marking lxc not for deletion
-      dont_delete=haproxy
+      dont_delete=rproxy
       for item in "${lxc_list_array[@]}"; do
          if [[ $dont_delete == "$item" ]]; 
          then 
-            echo "# $item is found! This is your proxy container. NEVER DELETE!"
+            echo "# $item is found! This is your Reverse Proxy container. NEVER DELETE!"
          else
             echo "# Deleting LXC $item... (FORCED)"
             lxc delete $item --force
@@ -354,7 +354,7 @@ cloudflare_auth_key=####
       # - END SPINNER
       # Getting the IP of LXC
       while ! [[ "${rproxy_LXC_IP}" =~ ${VALID_IP} ]]; do
-            rproxy_LXC_IP=$(lxc list | grep haproxy | awk '{print $6}')
+            rproxy_LXC_IP=$(lxc list | grep rproxy | awk '{print $6}')
             spin
       done
       endspin
@@ -376,8 +376,8 @@ cloudflare_auth_key=####
 
 
       echo "# "
-      echo "# Downloading Nginx..."
-      lxc exec rproxy -- sh -c "apt -y install nginx" --verbose
+      echo "# Install nginx to Reverse Proxy container..."
+      lxc exec rproxy -- sh -c "apt -y install nginx -qq" --verbose
 
    
 
@@ -619,7 +619,7 @@ cloudflare_auth_key=####
       
    else 
       echo "#"
-      echo "$FILE does not exist."
+      echo "# $FILE does not exist."
       echo "# Downloading a fresh nginx default config file"
       wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/play.yml
       mv play.yml ${lxcname}_lemp.yml
@@ -638,16 +638,16 @@ cloudflare_auth_key=####
    echo "# ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=${SSHKEY}"
    echo "#"
 
-   # time ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=~${SSHKEY} 
+   time ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=~${SSHKEY} 
 
 
    # Remove this later if its working then enable Ansible
    #
    #
-   echo "# Downloading Nginx..."
-   lxc exec ${lxcname}  -- sh -c "apt -y install nginx" --verbose
-   lxc exec ${lxcname}  -- sh -c "rm /var/www/html/index.nginx-debian.html" --verbose
-   lxc exec ${lxcname}  -- sh -c "echo \"<h1> This is LXC ${lxcname}\" >> /var/www/html/index.nginx-debian.html" --verbose
+   # echo "# Downloading Nginx..."
+   # lxc exec ${lxcname}  -- sh -c "apt -y install nginx -qq" --verbose
+   # lxc exec ${lxcname}  -- sh -c "rm /var/www/html/index.nginx-debian.html" --verbose
+   # lxc exec ${lxcname}  -- sh -c "echo \"<h1> This is LXC ${lxcname}\" >> /var/www/html/index.nginx-debian.html" --verbose
    #
    #
    # Remove this later if its working then enable Ansible
@@ -660,23 +660,34 @@ cloudflare_auth_key=####
    
    # Creating file /etc/nginx/conf.d/real-ip.conf in the newly created LXC
    lxc exec ${lxcname} -- sh -c "echo \"real_ip_header    X-Real-IP;\" >> /etc/nginx/conf.d/real-ip.conf" --verbose
-   lxc exec ${lxcname} -- sh -c "echo \"set_real_ip_from  proxy.lxd;\" >> /etc/nginx/conf.d/real-ip.conf" --verbose
+   lxc exec ${lxcname} -- sh -c "echo \"set_real_ip_from  rproxy.lxd;\" >> /etc/nginx/conf.d/real-ip.conf" --verbose
+
+
+
+
    # Test and Reload Nginx for this LXC
    lxc exec ${lxcname} -- sh -c "nginx -t; systemctl reload nginx" --verbose
 
 
    # Downloading default nginx1.example.com file
    echo "# "
-   echo "# Download and transfer HAProxy config file"    
+   echo "# Download and transfer default nginx site config file"    
    wget -q https://raw.githubusercontent.com/jmcausing/lxc-lemp-wp/master/nginx1.example.com   
 
    mv nginx1.example.com  ${cfdomain}.causingdesigns.net
 
+   # Insert site domain name to the nginx file
+   sed -i  "/^    # server_name/a\    server_name ${cfdomain}.causingdesigns.net;"  ${cfdomain}.causingdesigns.net 
+   sed -i  "/^            # proxy_pass/a\            proxy_pass http://${lxcname}.lxd;" ${cfdomain}.causingdesigns.net 
+
    # Send nginx site file
    lxc file push ${cfdomain}.causingdesigns.net rproxy/etc/nginx/sites-available/${cfdomain}.causingdesigns.net --verbose
 
+   # Remove nginx file ${cfdomain}.causingdesigns.net
+   rm ${cfdomain}.causingdesigns.net
+
    # Enable this site (symlink nginx)
-   lxc exec rproxy -- sh -c "ln -s /etc/nginx/sites-available/nginx1.example.com /etc/nginx/sites-enabled/" --verbose
+   lxc exec rproxy -- sh -c "ln -s /etc/nginx/sites-available/${cfdomain}.causingdesigns.net /etc/nginx/sites-enabled/" --verbose
 
    # Test and Reload Nginx for RPROXY container
    lxc exec rproxy -- sh -c "nginx -t; systemctl reload nginx" --verbose
