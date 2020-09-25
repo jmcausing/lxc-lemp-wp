@@ -7,7 +7,7 @@ server {
     location / {
             proxy_set_header Host $host; 
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass http://nginx1.lxd;
+            # proxy_pass http://nginx1.lxd; #nginx1 is the name of the lxd
     }
 
     real_ip_header proxy_protocol;
