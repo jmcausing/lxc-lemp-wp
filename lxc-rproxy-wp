@@ -363,7 +363,7 @@ cloudflare_auth_key=####
       echo "# "
       echo "# Updating Reverse Proxy container"
       echo "# "
-      lxc exec rproxy -- sh -c "apt update" --verbose
+      lxc exec rproxy -- sh -c "apt update -qq" --verbose
 
 
 
@@ -377,6 +377,27 @@ cloudflare_auth_key=####
       echo "# "
       echo "# Install nginx to Reverse Proxy container..."
       lxc exec rproxy -- sh -c "apt -y install nginx -qq" --verbose
+
+
+      # Install Let's Encrypt certbot to rprox continer
+      echo "# "
+      echo "# Let's install SSL Let's Encrypt certbot..."
+
+      echo "# "
+      echo "# Adding repository ppa:certbot/certbot"
+      lxc exec rproxy -- sh -c "add-apt-repository ppa:certbot/certbot -y" --verbose
+
+      echo "# Install certbot (support the creating of LE) and python-certbot-nginx (auto-configure the NGINX reverse proxy to use Let’s Encrypt certificates.)"
+      lxc exec rproxy -- sh -c "apt-get install certbot python-certbot-nginx -y -qq" --verbose
+
+      echo "# "
+      echo "# Run certbot for nginx SSL automation.."
+      lxc exec rproxy -- sh -c "certbot --nginx --non-interactive --agree-tos -m johnmarkcausing@gmail.com" --verbose
+      
+
+
+
+
 
    
 
@@ -662,8 +683,6 @@ cloudflare_auth_key=####
    lxc exec ${lxcname} -- sh -c "echo \"set_real_ip_from  rproxy.lxd;\" >> /etc/nginx/conf.d/real-ip.conf" --verbose
 
 
-
-
    # Test and Reload Nginx for this LXC
    lxc exec ${lxcname} -- sh -c "nginx -t; systemctl reload nginx" --verbose
 
@@ -688,8 +707,21 @@ cloudflare_auth_key=####
    # Enable this site (symlink nginx)
    lxc exec rproxy -- sh -c "ln -s /etc/nginx/sites-available/${cfdomain}.causingdesigns.net /etc/nginx/sites-enabled/" --verbose
 
+  
+   echo "# "
+   echo "# Apply Let's Encrypt SSL for this domain (certbot automated)"
+   lxc exec rproxy -- sh -c "certbot --nginx --non-interactive --agree-tos --domains ${cfdomain}.causingdesigns.net --email johnmarkcausing@gmail.com" --verbose 
+
+
+   echo "# "
+   echo "# Append proxy_protocol to nginx config ssl line"
+   lxc exec rproxy -- sh -c "sed -i 's/ssl;/ssl proxy_protocol;/g' /etc/nginx/sites-enabled/${cfdomain}.causingdesigns.net"  --verbose
+
+  
    # Test and Reload Nginx for RPROXY container
    lxc exec rproxy -- sh -c "nginx -t; systemctl reload nginx" --verbose
+
+
 
 
 
