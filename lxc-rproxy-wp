@@ -5,7 +5,7 @@ echo "#"
 # Cloudflare add DNS for this LXC Cloudflare zone is the zone which holds the record
 zone=causingdesigns.net
 ## Cloudflare authentication details keep these private
-cloudflare_auth_email=###
+cloudflare_auth_email=####
 cloudflare_auth_key=####
 
 
@@ -316,6 +316,7 @@ cloudflare_auth_key=####
    if [[ $(lxc list | grep rproxy) ]]; 
    then
       echo "# Reverse Proxy container is found!"
+      echo "#"
    else
 
       # Checking LXD version.  Version 3 will continue. Version 2 will exit!
@@ -419,7 +420,7 @@ cloudflare_auth_key=####
 
    # Initial Cloudflare Setup
    echo "#"
-   echo "# This is still designed for subdomain. Hardcoded in haproxy.cfg acl host_\${lxcname} hdr(host) -i \${cfdomain}.causingdesigns.net"
+   echo "# This is still designed for subdomain. Sites are inserted in proxy container /etc/nginx/sites-available/"
    echo "#"
    echo "# Let's setup your Cloudflare domain to add the dns.."
 
@@ -735,7 +736,17 @@ cloudflare_auth_key=####
    lxc exec ${lxcname} -- sh -c "php wp-cli.phar --info" --verbose
    lxc exec ${lxcname} -- sh -c "chmod +x wp-cli.phar" --verbose
    lxc exec ${lxcname} -- sh -c "sudo mv wp-cli.phar /usr/local/bin/wp" --verbose
-   
+
+
+   # Install the WordPress database.
+  
+   lxc exec ${lxcname} -- sudo --login --user ubuntu sh -c "wp core install --url=http://$cfdomain.causingdesigns.net --title=${lxcname} --admin_user=test --admin_password=test --admin_email=YOU@YOURDOMAIN.com   --path=/var/www/html" --verbose
+
+
+   # Search and replace
+   echo "#"
+   echo "# WP-CLI run search and relace to fix mixed-content issue"
+   lxc exec ${lxcname} -- sudo --login --user ubuntu sh -c "wp search-replace http://$cfdomain.causingdesigns.net https://$cfdomain.causingdesigns.net --path=/var/www/html" --verbose
 
 
 
