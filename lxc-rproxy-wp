@@ -5,8 +5,8 @@ echo "#"
 # Cloudflare add DNS for this LXC Cloudflare zone is the zone which holds the record
 zone=causingdesigns.net
 ## Cloudflare authentication details keep these private
-cloudflare_auth_email=####
-cloudflare_auth_key=####
+cloudflare_auth_email=###
+cloudflare_auth_key=###
 
 
    #################### 
