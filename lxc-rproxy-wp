@@ -6,7 +6,7 @@ echo "#"
 zone=causingdesigns.net
 ## Cloudflare authentication details keep these private
 cloudflare_auth_email=###
-cloudflare_auth_key=###
+cloudflare_auth_key=####
 
 
    #################### 
@@ -203,6 +203,7 @@ cloudflare_auth_key=###
       echo "# Cleaning Reverse Proxy LXC symlink site files in /etc/nginx/sites-enabled"
       echo "# "
       lxc exec rproxy -- sh -c "find /etc/nginx/sites-enabled/ ! -name default  -type l -delete" --verbose
+      lxc exec rproxy -- sh -c "find /etc/nginx/sites-enabled/ ! -name default  -type f -delete" --verbose
 
       echo "# Done! Reverse Proxy container is now clean!!" 
       echo "#"
@@ -673,6 +674,12 @@ cloudflare_auth_key=###
    # Remove this later if its working then enable Ansible
 
 
+   echo "#"
+   echo "# Add user 'ubuntu' to groups www-data"
+   lxc exec ${lxcname} -- sh -c "usermod -a -G www-data ubuntu" --verbose
+   lxc exec ${lxcname} -- sh -c "ls -al /var/www/html" --verbose
+
+
    # Configure Reverse Proxy container (rproxy) for this LXC
    #!/bin/bash
    echo "#"
@@ -721,6 +728,15 @@ cloudflare_auth_key=###
    # Test and Reload Nginx for RPROXY container
    lxc exec rproxy -- sh -c "nginx -t; systemctl reload nginx" --verbose
 
+   # Setup WP CLI
+   echo "#"
+   echo "# Download and install WP-CLI"
+   lxc exec ${lxcname} -- sh -c "curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" --verbose
+   lxc exec ${lxcname} -- sh -c "php wp-cli.phar --info" --verbose
+   lxc exec ${lxcname} -- sh -c "chmod +x wp-cli.phar" --verbose
+   lxc exec ${lxcname} -- sh -c "sudo mv wp-cli.phar /usr/local/bin/wp" --verbose
+   
+
 
 
 
@@ -730,4 +746,5 @@ cloudflare_auth_key=###
    echo "#"
    echo "# Visit your WordPress site using this link: http://$cfdomain.causingdesigns.net"
    echo "# Thank you for using LXC LEMP + WordPress setup!"
+
 
