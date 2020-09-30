@@ -82,6 +82,16 @@ $table_prefix = 'wp_';
  */
 define( 'WP_DEBUG', false );
 
+// This is for mixed-content and cookie login issue workaround
+if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') 
+	$_SERVER['HTTPS']='on';
+
+define('ADMIN_COOKIE_PATH', '/');
+define('COOKIEPATH', '');
+define('SITECOOKIEPATH', '');
+define('COOKIE_DOMAIN', false);
+// This is for mixed-content and cookie login issue workaround
+
 /* That's all, stop editing! Happy publishing. */
 
 /** Absolute path to the WordPress directory. */
