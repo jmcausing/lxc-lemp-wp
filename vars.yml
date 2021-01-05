@@ -3,7 +3,7 @@
 mysql_root_password: "mysql_root_password"
 mysql_db: "wordpress"
 mysql_user: "wp_user"
-mysql_password: "password"
+mysql_password: "wp_password"
 
 # We are not using this for now
 # HTTP Settings
