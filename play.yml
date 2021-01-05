@@ -51,7 +51,7 @@
 
     - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
       mysql_user:
-       name: wp_user
+       name: "{{ mysql_user }}"
        password: "{{ mysql_password }}"
        state: present
        login_unix_socket: /var/run/mysqld/mysqld.sock
