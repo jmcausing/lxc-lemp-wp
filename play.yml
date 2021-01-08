@@ -108,7 +108,7 @@
         path: "/var/www/html"
         state: directory
         recurse: yes
-        owner: ubuntu
+        owner: www-data
         group: www-data
       tags: [ wordpress ]
 
@@ -124,7 +124,7 @@
       template:
         src: "ansible_wpconfig.php"
         dest: "/var/www/html/wp-config.php"
-        owner: ubuntu
+        owner: www-data
         group: www-data
 
 
