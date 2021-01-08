@@ -21,8 +21,11 @@
 server {
         listen 80 default_server;
         listen [::]:80 default_server;
-		
-		
+	
+	# Work around to avoid removing port if there is no slash at the end of url.
+	if (-d $request_filename) {
+	    rewrite [^/]$ $scheme://$http_host$uri/ permanent;
+	}		
 		location = /favicon.ico { log_not_found off; access_log off; }
 		location = /robots.txt { log_not_found off; access_log off; allow all; }
 		location ~* \.(css|gif|ico|jpeg|jpg|js|png)$ {
