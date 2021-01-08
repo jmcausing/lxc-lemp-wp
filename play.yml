@@ -69,10 +69,10 @@
     # Step 2 — Installing Additional PHP Extensions
     # https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-lemp-nginx-mariadb-and-php-on-debian-10#step-2-%E2%80%94-installing-additional-php-extensions
  
-    - name: Installing PHP 7.3 extension
+    - name: Installing PHP 7.4 extension
       apt:  name={{ item }} 
-      loop: [ 'php7.3-fpm', 'php7.3-common', 'php7.3-mysql', 'php7.3-curl', 'php7.3-json', 'php7.3-mbstring', 'php7.3-xml', 'php7.3-zip', 'php7.3-gd', 'php7.3-soap', 'php7.3-ssh2', 'php7.3-tokenizer' ]
-      # loop: [ 'php7.3-fpm', 'php7.3-mysql', 'php7.3-common','php7.3-cli','php7.3-bcmath','php7.3-bz2','php7.3-curl','php7.3-gd','php7.3-intl','php7.3-json','php7.3-mbstring','php7.3-readline','php7.3-xml','php7.3-zip' ]
+      loop: [ 'php7.4-fpm', 'php7.4-common', 'php7.4-mysql', 'php7.4-curl', 'php7.4-json', 'php7.4-mbstring', 'php7.4-xml', 'php7.4-zip', 'php7.4-gd', 'php7.4-soap', 'php7.4-ssh2', 'php7.4-tokenizer' ]
+      # loop: [ 'php7.4-fpm', 'php7.4-mysql', 'php7.4-common','php7.4-cli','php7.4-bcmath','php7.4-bz2','php7.4-curl','php7.4-gd','php7.4-intl','php7.4-json','php7.4-mbstring','php7.4-readline','php7.4-xml','php7.4-zip' ]
 
 
     # Nginx Configuration
@@ -130,7 +130,7 @@
 
     - name: set PHP memory limit
       ini_file:
-          path: /etc/php/7.3/fpm/php.ini
+          path: /etc/php/7.4/fpm/php.ini
           section: PHP
           option: memory_limit
           value: 512M
@@ -138,14 +138,14 @@
 
     - name: set PHP post_max_size
       ini_file:
-          path: /etc/php/7.3/fpm/php.ini
+          path: /etc/php/7.4/fpm/php.ini
           section: PHP
           option: post_max_size
           value: 64M
 
     - name: set PHP upload_max_filesize
       ini_file:
-          path: /etc/php/7.3/fpm/php.ini
+          path: /etc/php/7.4/fpm/php.ini
           section: PHP
           option: upload_max_filesize
           value: 100M
@@ -153,13 +153,14 @@
         
     - name: set PHP max_execution_time
       ini_file:
-          path: /etc/php/7.3/fpm/php.ini
+
+          path: /etc/php/7.4/fpm/php.ini
           section: PHP
           option: max_execution_time
           value: 300
         
     - name: Restart PHP FPM
-      shell: "sudo systemctl restart php7.3-fpm.service"         
+      shell: "sudo systemctl restart php7.4-fpm.service"         
 
     # WordPress Configuration and permission -
     # -- END
