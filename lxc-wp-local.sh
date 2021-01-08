@@ -135,6 +135,16 @@ echo "#"
    echo "# Alright! Let's generate the LXC container Ubuntu 18.04: $lxcname"
    echo "#"
    echo "#"
+
+   # Read WordPress Password
+   echo -n "# Enter your WordPress Password": 
+   read -s wppassword
+
+   echo "#"
+   read -p "# Enter your WordPress email: " wpemail
+   echo "#"
+   echo "#"
+
    echo "# Make sure you run this from your local laptop/machine FIRST"
    echo "# ssh-keygen -f ~/.ssh/$lxcname"
    echo "# Are you done generating SSH key? Paste the public key here of $lxcname.pub"
@@ -397,6 +407,12 @@ echo "#"
    ls -al vars.yml
    echo "#"
 
+
+   echo "# Updating mysql credentials.."
+   sed -i "s/wp_user/${lxcname}/g" vars.yml
+   sed -i "s/wp_password/${wppassword}/g" vars.yml
+
+
    echo "#"
    echo "# Running playbook with this command:"
    echo "#"
@@ -404,6 +420,56 @@ echo "#"
    echo "#"
 
    time ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook ${lxcname}_lemp.yml -i ${lxcname}_hosts --private-key=~${SSHKEY} 
+
+   echo "#"
+   echo "# Add user 'ubuntu' to groups www-data"
+   lxc exec ${lxcname} -- sh -c "usermod -a -G www-data ubuntu" --verbose
+   lxc exec ${lxcname} -- sh -c "ls -al /var/www/html" --verbose
+
+
+  # Setup WP CLI
+   echo "#"
+   echo "# Download and install WP-CLI"
+   lxc exec ${lxcname} -- sh -c "curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" --verbose
+   lxc exec ${lxcname} -- sh -c "php wp-cli.phar --info" --verbose
+   lxc exec ${lxcname} -- sh -c "chmod +x wp-cli.phar" --verbose
+   lxc exec ${lxcname} -- sh -c "sudo mv wp-cli.phar /usr/local/bin/wp" --verbose
+
+
+   # Install the WordPress database.
+   echo "# Installing WP Core -  wp core install"
+   echo "#"
+   lxc exec ${lxcname} -- sudo --login --user ubuntu sh -c "wp core install --url=http://$hostip:$webport --title=${lxcname} --admin_user=${lxcname}  --admin_password=${wppassword}  --admin_email=${wpemail}   --path=/var/www/html" --verbose
+
+
+   # Test WP Cli
+   echo "# Testing WP CLI. Get WP Core version"
+   # echo "# WP-CLI run search and relace to fix mixed-content issue"
+   lxc exec ${lxcname} -- sudo --login --user ubuntu sh -c "wp core version --path=/var/www/html" --verbose
+
+
+   # Seutp phpmyadin
+   echo "#"
+   echo "# Let's setup phpmyadmin..."
+   echo "#"
+   echo "# Running: export DEBIAN_FRONTEND=noninteractive;apt-get -yq install phpmyadmin"
+   lxc exec  ${lxcname} -- sh -c "export DEBIAN_FRONTEND=noninteractive;apt-get -yq install phpmyadmin > /dev/null" --verbose
+
+
+   echo "#"
+   echo "# Running: dpkg-reconfigure --frontend=noninteractive phpmyadmin"
+   lxc exec ${lxcname} -- sh -c "dpkg-reconfigure --frontend=noninteractive phpmyadmin" --verbose 
+
+   echo "#"
+   echo "# ln -s /usr/share/phpmyadmin /var/www/html"
+   lxc exec ${lxcname} -- sh -c "ln -s /usr/share/phpmyadmin /var/www/html" --verbose 
+
+   echo "#"
+   echo "# systemctl restart php7.4-fpm"
+   lxc exec ${lxcname} wp --verbose 
+
+
+
 
    # Add proxy device
    lxc config device add ${lxcname} webport$webport proxy listen=tcp:0.0.0.0:$webport connect=tcp:127.0.0.1:80
@@ -427,8 +493,11 @@ echo "#"
    echo "# Connect to this: ssh -i ~/.ssh/${lxcname} -p $sshport root@$hostip"
    echo "#"
    echo "#"
+   echo "# WordPress login url: http://$hostip:$webport/wp-admin "
+   echo "# WordPerss username: ${lxcname} -- Password: the one you entered earlier" 
+
    echo "#"
-   echo "# Add this also to your ssh config file (like if you are using Visual Code Studio for remote SSH)"
+   echo "# Add this also to your ssh config file like if you are using Visual Code Studio for remote SSH"
    echo "Host ${lxcname}"
    echo  "   User root"
    echo  "   Hostname $hostip"
