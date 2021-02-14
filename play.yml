@@ -113,18 +113,18 @@
       tags: [ wordpress ]
 
     - name: Set permissions for directories
-      shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 750 {} \\;"
+      shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 755 {} \\;"
       tags: [ wordpress ]
 
     - name: Set permissions for files
-      shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 640 {} \\;"
+      shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 644 {} \\;"
       tags: [ wordpress ]
     
     - name: Set up wp-config
       template:
         src: "ansible_wpconfig.php"
         dest: "/var/www/html/wp-config.php"
-        owner: www-data
+        owner: ubuntu
         group: www-data
 
 
