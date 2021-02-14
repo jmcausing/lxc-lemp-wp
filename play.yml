@@ -108,7 +108,7 @@
         path: "/var/www/html"
         state: directory
         recurse: yes
-        owner: www-data
+        owner: ubuntu
         group: www-data
       tags: [ wordpress ]
 
