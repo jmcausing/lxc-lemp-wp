@@ -161,6 +161,10 @@
         
     - name: Restart PHP FPM
       shell: "sudo systemctl restart php7.4-fpm.service"         
+      
+    # Set permission in wp-content to 775
+    - name: Permssion set wp-content to 775
+      shell: "chmod -R 775 /var/www/html/wp-content"      
 
     # WordPress Configuration and permission -
     # -- END
