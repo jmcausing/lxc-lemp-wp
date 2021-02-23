@@ -461,14 +461,16 @@ echo "#"
    echo "#"
    echo "# Running: dpkg-reconfigure --frontend=noninteractive phpmyadmin"
    lxc exec ${lxcname} -- sh -c "dpkg-reconfigure --frontend=noninteractive phpmyadmin" --verbose 
+   echo "#"
+   echo "# systemctl restart php7.4-fpm"
 
    echo "#"
    echo "# ln -s /usr/share/phpmyadmin /var/www/html"
    lxc exec ${lxcname} -- sh -c "ln -s /usr/share/phpmyadmin /var/www/html" --verbose 
 
-   echo "#"
-   echo "# systemctl restart php7.4-fpm"
-   lxc exec ${lxcname} wp --verbose 
+   # Fix permission in wp-content/uploads
+   lxc exec ${lxcname} sh -c "chmod -R 775 /var/www/html/wp-content/uploads" --verbose
+   lxc exec ${lxcname} sh -c "chown -R ubuntu:www-data /var/www/html/wp-content/uploads" --verbose
 
 
 
