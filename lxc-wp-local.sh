@@ -148,7 +148,12 @@ echo "#"
    echo "#"
 
    echo "# Make sure you run this from your local laptop/machine FIRST"
+   echo "# For Mac or Linux"
    echo "# ssh-keygen -f ~/.ssh/$lxcname"
+   echo "#"
+   echo "# For Windows"
+   echo "# ssh-keygen -f %HOMEDRIVE%%HOMEPATH%/.ssh/$lxcname"
+   echo "#"   
    echo "# Are you done generating SSH key? Paste the public key here of $lxcname.pub"
    read -p "# Enter PUBLIC KEY $lxcname.pub : " lxcpub
 
