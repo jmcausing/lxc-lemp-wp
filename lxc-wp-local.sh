@@ -2,9 +2,10 @@
 
 webport=8$(( $RANDOM % 10 + 909 ))
 sshport=2$(( $RANDOM % 10 + 909 ))
-hostip=$(hostname -I | cut -d' ' -f2)
-#hostip=$(hostname -I | cut -d' ' -f1)
-# 'f2' fix for windows multipass --network
+hostip=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}') # Only get eth0 IP to avoid connection conflict
+
+hostip=$(hostname -I | cut -d' ' -f1)
+'f2' fix for windows multipass --network
 
 clear
 echo "#### LXC + LEMP + WordPress by generator by John Mark C."
